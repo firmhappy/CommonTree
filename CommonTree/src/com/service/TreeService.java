@@ -2,8 +2,10 @@ package com.service;
 
 import java.util.List;
 
+import com.bean.Vo;
+
 public interface TreeService {
-	public List getChildren(Object vo);
-	public Object addEntity(Object vo);
-	public Object updateEntity(Object vo);
+	public List getChildren(Vo vo);
+	public Vo addEntity(Vo vo);
+	public Vo updateEntity(Vo vo);
 }

@@ -8,18 +8,27 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 public class CommonDAO {
+	public int getChildrenCount(Session session,String classname,long id){
+		int count=0;
+		String hql="select count(*) from %s where pid=:pid";
+		Query query=session.createQuery(String.format(hql, classname));
+		query.setParameter("pid", id);
+		count=Integer.parseInt(query.uniqueResult().toString());
+		return count;
+	}
 	
-	public List getChildren(Session session,Object po){
+	public List getChildren(Session session,Object po,int page,int pagesize){
 		List list=new ArrayList<Object>();
 		String hql="from %s where pid=:pid order by id";
 		String name=po.getClass().getName();
-		Field pidf;
 		try {
-			pidf = po.getClass().getDeclaredField("pid");
+			Field pidf = po.getClass().getDeclaredField("pid");
 			pidf.setAccessible(true);
 			Object pid=pidf.get(po);
 			Query query=session.createQuery(String.format(hql, name));
 			query.setParameter("pid", pid);
+			query.setFirstResult((page-1)*pagesize);
+			query.setMaxResults(pagesize);
 			list=query.list();
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
@@ -39,27 +48,6 @@ public class CommonDAO {
 	
 	public Object addEntity(Session session,Object po){
 		session.save(po);
-		try {
-			Field idf=po.getClass().getDeclaredField("id");
-			idf.setAccessible(true);
-			idf.set(po, idf.get(po));
-		} catch (SecurityException e) {
-			System.out.println("无法访问id属性");
-			e.printStackTrace();
-			return null;
-		} catch (NoSuchFieldException e) {
-			System.out.println("PO中没有id属性");
-			e.printStackTrace();
-			return null;
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
 		return po;
 	}
 	
