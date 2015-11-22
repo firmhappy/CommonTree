@@ -36,5 +36,59 @@ public class CommonDAO {
 		}
 		return list;
 	}
+	
+	public Object addEntity(Session session,Object po){
+		session.save(po);
+		try {
+			Field idf=po.getClass().getDeclaredField("id");
+			idf.setAccessible(true);
+			idf.set(po, idf.get(po));
+		} catch (SecurityException e) {
+			System.out.println("无法访问id属性");
+			e.printStackTrace();
+			return null;
+		} catch (NoSuchFieldException e) {
+			System.out.println("PO中没有id属性");
+			e.printStackTrace();
+			return null;
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		return po;
+	}
+	
+	public Object updateEntity(Session session,Object po){
+		session.update(po);
+		try {
+			Field idf=po.getClass().getDeclaredField("id");
+			idf.setAccessible(true);
+			po=session.get(po.getClass(), Long.parseLong(idf.get(po).toString()));
+			return po;
+		} catch (SecurityException e) {
+			System.out.println("无法访问id属性");
+			e.printStackTrace();
+			return null;
+		} catch (NoSuchFieldException e) {
+			System.out.println("PO中缺少id属性");
+			e.printStackTrace();
+			return null;
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
 
 }

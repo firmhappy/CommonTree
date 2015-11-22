@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import com.dao.CommonDAO;
 import com.db.HibernateSessionFactory;
@@ -14,16 +15,58 @@ public class TreeServiceImpl implements TreeService {
 	@Override
 	public List getChildren(Object vo) {
 		List list = new ArrayList<Object>();
-		Object po=this.voToPo(vo);
+		Object po=this.voToPo(vo,true);
 		Session session=HibernateSessionFactory.getSession();
 		CommonDAO cdao=new CommonDAO();
 		list=cdao.getChildren(session, po);
+		session.close();
 		return list;
 	}
+	
+	public Object addEntity(Object vo){
+		Session session=HibernateSessionFactory.getSession();
+		CommonDAO cdao=new CommonDAO();
+		Transaction transaction=session.beginTransaction();
+		Object po=cdao.addEntity(session, this.voToPo(vo,true));
+		if(po==null){
+			transaction.rollback();
+			session.close();
+			return null;
+		}else{
+			transaction.commit();
+			vo=this.voToPo(po, false);
+			session.close();
+			return vo;
+		}
+	}
+	
+	public Object updateEntity(Object vo){
+		Object po=this.voToPo(vo, true);
+		Session session=HibernateSessionFactory.getSession();
+		Transaction transaction = session.beginTransaction();
+		CommonDAO cdao=new CommonDAO();
+		po=cdao.updateEntity(session, po);
+		if(po==null){
+			transaction.rollback();
+			session.close();
+			return null;
+		}else{
+			vo=this.voToPo(po, false);
+			transaction.commit();
+			session.close();
+			return vo;
+		}
+	}
 
-	private Object voToPo(Object vo) {
+	/**
+	 * 
+	 * @param vo
+	 * @param f f==true:VOµ½PO£»f==false:POµ½VO
+	 * @return
+	 */
+	private Object voToPo(Object vo,boolean f) {
 		String voname = vo.getClass().getName();
-		String poname = voname.substring(0, voname.length() - 2);
+		String poname =f? voname.substring(0, voname.length() - 2):voname+"Vo";
 		try {
 			Object po = Class.forName(poname).newInstance();
 			Field[] vfs = vo.getClass().getDeclaredFields();
