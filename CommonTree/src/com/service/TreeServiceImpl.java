@@ -36,6 +36,7 @@ public class TreeServiceImpl implements TreeService {
 				lvo.setIsParent(count > 0 ? "true" : "false");
 				lvo.setPage("1");
 				lvo.setPageSize(vo.getPageSize());
+				lvo.setClassName(vo.getClassName());
 				res.add(lvo);
 			} catch (SecurityException e) {
 				System.out.println("无法放完id属性");
