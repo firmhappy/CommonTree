@@ -210,19 +210,30 @@
 </body>
 <script type="text/javascript">
 	function load() {
+		var className=window.prompt("请输入类名", "");
+		var pageSize=window.prompt("请输入页面大小", "");
+		if(className==""||pageSize==""){
+			alert("输入错误");
+			return;
+		}
 		$.post("/CommonTree/GetChildrenAction.action", {
 			pid : -1,
-			className : "Node",
+			className : className,
 			page : "1",
-			pageSize : "10",
+			pageSize : pageSize,
 		}, function(data, status) {
 			$.fn.zTree.init($("#zTree"), setting, data);
 			var tth = document.getElementById("entityth");
 			var ttd = document.getElementById("entitytd");
 			var thstr = "", tdstr = "";
+			var readonly="readonly='readonly'";
 			$.each(data[0].dataobj, function(i) {
 				thstr += "<th class='ztd'>" + i + "</th>";
-				tdstr += "<td class='ztd'><input type='text' id='"+i+"' value='&nbsp;'/></td>";
+				var attribute="";
+				if(i=="id"||i=="page"||i=="pageSize"||i=="className"||i=="count"||i=="path"||i=="isParent"){
+					attribute=readonly;
+				}
+				tdstr += "<td class='ztd'><input "+attribute+"  type='text' id='"+i+"' value='&nbsp;'/></td>";
 			});
 			ttd.innerHTML = tdstr;
 			tth.innerHTML = thstr;
