@@ -127,17 +127,10 @@
 		});
 	};
 	function zTreeonClick(event, treeId, treeNode) {
-		var tth = document.getElementById("entityth");
-		var ttd = document.getElementById("entitytd");
-		var thstr = "", tdstr = "";
 		var data = treeNode.dataobj;
 		$.each(data, function(i) {
-			thstr += "<th class='ztd'>" + i + "</th>";
-			tdstr += "<td class='ztd'><input type='text' id='"+i+"' value='" + data[i] + "'/></td>";
+			document.getElementById(i).value=data[i];
 		});
-		ttd.innerHTML = tdstr;
-		tth.innerHTML = thstr;
-
 	}
 </SCRIPT>
 
@@ -186,6 +179,8 @@
 <body>
 	<button onclick="load()">Load</button>
 	<button onclick="update()">update</button>
+	<button onclick="insert()">insert</button>
+	<button onclick="entityremove()">delete</button>
 	<table>
 		<tr>
 			<td>
@@ -222,11 +217,18 @@
 			pageSize : "10",
 		}, function(data, status) {
 			$.fn.zTree.init($("#zTree"), setting, data);
+			var tth = document.getElementById("entityth");
+			var ttd = document.getElementById("entitytd");
+			var thstr = "", tdstr = "";
+			$.each(data[0].dataobj, function(i) {
+				thstr += "<th class='ztd'>" + i + "</th>";
+				tdstr += "<td class='ztd'><input type='text' id='"+i+"' value='&nbsp;'/></td>";
+			});
+			ttd.innerHTML = tdstr;
+			tth.innerHTML = thstr;
 		});
 	}
-	
-	function update(){
-		var treeobj=$.fn.zTree.getZTreeObj("zTree");
+	function makeparam(){		
 		var jsonstr="";
 		var ths=document.getElementById("entityth").getElementsByTagName("th");
 		for(var i=0;i<ths.length;i++){
@@ -238,6 +240,12 @@
 			jsonstr+=("\""+key+"\":"+"\""+value+"\"");
 		}		
 		var param="{"+jsonstr+"}";
+		return param;
+	}
+	
+	function update(){
+		
+		var param=makeparam();
 		$.post("/CommonTree/UpdateAction.action",{
 			param:param
 		},function(data,status){
@@ -246,6 +254,28 @@
 			var nptree=treeobj.getNodeByParam("id",data.pid);
 			treeobj.reAsyncChildNodes(nptree, "refresh");
 			treeobj.reAsyncChildNodes(optree, "refresh");
+		});
+	}
+	function insert(){
+		var treeobj=$.fn.zTree.getZTreeObj("zTree");
+		var param=makeparam();
+		$.post("/CommonTree/InsertAction.action",{
+			param:param
+		},function(data,status){
+			var parent=treeobj.getNodeByParam("id",data.pid);
+			data.pageSize=parent.pageSize;
+			treeobj.addNodes(parent,data);
+			treeobj.reAsyncChildNodes(parent,"refresh");
+		});
+	}
+	function entityremove(){
+		var treeobj=$.fn.zTree.getZTreeObj("zTree");
+		var param=makeparam();
+		$.post("/CommonTree/DeleteAction.action",{
+			param:param
+		},function(data,status){
+			var parent=treeobj.getNodeByParam("id",data.pid);
+			treeobj.reAsyncChildNodes(parent,"refresh");
 		});
 	}
 </script>

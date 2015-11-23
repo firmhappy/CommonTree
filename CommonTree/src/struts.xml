@@ -20,5 +20,19 @@
 				<param name="root">responsejson</param>
 			</result>
 		</action>
+		<action name="InsertAction" class="com.action.TreeAction"
+			method="insert">
+			<param name="param"></param>
+			<result type="json" name="success">
+				<param name="root">responsejson</param>
+			</result>
+		</action>
+		<action name="DeleteAction" class="com.action.TreeAction"
+			method="delete">
+			<param name="param"></param>
+			<result type="json" name="success">
+				<param name="root">responsejson</param>
+			</result>
+		</action>
 	</package>
 </struts>    

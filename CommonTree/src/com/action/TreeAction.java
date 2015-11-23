@@ -60,14 +60,18 @@ public class TreeAction extends ActionSupport {
 		}
 	}
 
-	public String update() {
+	public String insert() {
 		JSONObject json;
 		try {
 			json = new JSONObject(param);
-			Vo vo=this.jsonToVo(json);
-			TreeService ts=new TreeServiceImpl();
-			vo=ts.updateEntity(vo);
-			this.responsejson=this.voToMap(vo);
+			Vo vo = this.jsonToVo(json);
+			TreeService ts = new TreeServiceImpl();
+			vo = ts.addEntity(vo);
+			vo.setClassName(json.getString("className"));
+			vo.setPage("1");
+			vo.setIsParent("false");
+			vo.setCount(0);
+			this.responsejson = this.voToMap(vo);
 			return Action.SUCCESS;
 		} catch (JSONException e) {
 			System.out.println("数据格式错误");
@@ -83,12 +87,63 @@ public class TreeAction extends ActionSupport {
 			return Action.ERROR;
 		}
 	}
-	
-	private Map voToMap(Vo o) throws IllegalArgumentException, IllegalAccessException{
+
+	@SuppressWarnings("finally")
+	public String delete() {
+		JSONObject json;
+		TreeService ts = new TreeServiceImpl();
+		long pid=-1;
+		boolean res=false;
+		Map map=new HashMap<String,Object>();
+		try {
+			json = new JSONObject(param);
+			Vo vo = this.jsonToVo(json);
+			res = ts.deleteEntity(vo);
+			if(res){
+				pid=Long.parseLong(json.get("pid").toString());
+			}
+		} catch (JSONException e) {
+			System.out.println("数据格式错误");
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			map.put("pid", pid);
+			this.setResponsejson(map);
+			return Action.SUCCESS;
+		}
+	}
+
+	public String update() {
+		JSONObject json;
+		try {
+			json = new JSONObject(param);
+			Vo vo = this.jsonToVo(json);
+			TreeService ts = new TreeServiceImpl();
+			vo = ts.updateEntity(vo);
+			this.responsejson = this.voToMap(vo);
+			return Action.SUCCESS;
+		} catch (JSONException e) {
+			System.out.println("数据格式错误");
+			e.printStackTrace();
+			return Action.ERROR;
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Action.ERROR;
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Action.ERROR;
+		}
+	}
+
+	private Map voToMap(Vo o) throws IllegalArgumentException,
+			IllegalAccessException {
 		Map map = new HashMap<String, Object>();
 		Field[] subfields = o.getClass().getDeclaredFields();
-		Field[] superfields = o.getClass().getSuperclass()
-				.getDeclaredFields();
+		Field[] superfields = o.getClass().getSuperclass().getDeclaredFields();
 		Field[] fields = Arrays.copyOf(subfields, subfields.length
 				+ superfields.length);
 		System.arraycopy(superfields, 0, fields, subfields.length,
@@ -114,7 +169,9 @@ public class TreeAction extends ActionSupport {
 	private Vo jsonToVo(JSONObject json) {
 		Vo vo = null;
 		try {
-			vo = (Vo) Class.forName("com.bean."+json.getString("className")+"Vo").newInstance();
+			vo = (Vo) Class.forName(
+					"com.bean." + json.getString("className") + "Vo")
+					.newInstance();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,9 +216,9 @@ public class TreeAction extends ActionSupport {
 				if (key.equals("id") || key.equals("pid")) {
 					field.set(vo, Long.parseLong(json.getString(key)));
 
-				} else if(key.equals("count")){
+				} else if (key.equals("count")) {
 					field.set(vo, Integer.parseInt(json.getString(key)));
-				}else {
+				} else {
 					field.set(vo, json.get(key).toString());
 				}
 			} catch (NumberFormatException e) {

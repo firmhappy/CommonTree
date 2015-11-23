@@ -49,6 +49,23 @@ public class TreeServiceImpl implements TreeService {
 		session.close();
 		return res;
 	}
+	
+	public boolean deleteEntity(Vo vo){
+		Object po=this.voToPo(vo);
+		CommonDAO cdao=new CommonDAO();
+		Session session=HibernateSessionFactory.getSession();
+		Transaction transaction=session.beginTransaction();
+		boolean res=cdao.deleteEntity(session, po);
+		if(res){
+			transaction.commit();
+			session.close();
+			return true;
+		}else{
+			transaction.rollback();
+			session.close();
+			return false;
+		}
+	}
 
 	public Vo addEntity(Vo vo) {
 		Session session = HibernateSessionFactory.getSession();

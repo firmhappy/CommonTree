@@ -48,7 +48,41 @@ public class CommonDAO {
 
 	public Object addEntity(Session session, Object po) {
 		session.save(po);
+		this.updateEntity(session, po);
 		return po;
+	}
+	
+	public boolean deleteEntity(Session session,Object po){
+		String hql="delete from %s where path like :path";
+		Query query=session.createQuery(String.format(hql, po.getClass().getName()));
+		try {
+			Field pathfield=po.getClass().getDeclaredField("path");
+			pathfield.setAccessible(true);
+			String path=pathfield.get(po).toString();
+			query.setString("path", path+"%");
+			int count=query.executeUpdate();
+			if(count>0){
+				return true;
+			}else{
+				return false;
+			}
+		} catch (SecurityException e) {
+			System.out.println("无法访问PO属性");
+			e.printStackTrace();
+			return false;
+		} catch (NoSuchFieldException e) {
+			System.out.println("PO中没有path属性");
+			e.printStackTrace();
+			return false;
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public Object updateEntity(Session session, Object po) {

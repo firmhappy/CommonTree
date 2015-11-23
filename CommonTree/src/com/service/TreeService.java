@@ -8,4 +8,5 @@ public interface TreeService {
 	public List getChildren(Vo vo);
 	public Vo addEntity(Vo vo);
 	public Vo updateEntity(Vo vo);
+	public boolean deleteEntity(Vo vo);
 }
